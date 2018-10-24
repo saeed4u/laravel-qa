@@ -38,6 +38,11 @@
 
                                         <div class="ml-auto">
                                             <a href="{{route('questions.edit',$question->id)}}" class="btn btn-sm btn-outline-info">Edit</a>
+                                            <form class="form-delete" method="post" action="{{route('questions.destroy',$question->id)}}">
+                                                @method('DELETE')
+                                                @csrf
+                                                <button class="btn btn-outline-danger btn-sm" type="submit" onclick="return confirm('Are you sure you want to delete this question?')">DELETE</button>
+                                            </form>
                                         </div>
                                     </div>
                                     <p class="lead">
