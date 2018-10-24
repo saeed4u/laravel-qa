@@ -6,9 +6,19 @@ use App\Http\Requests\AskQuestionRequest;
 use App\Question;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
+use phpDocumentor\Reflection\Types\Void_;
 
 class QuestionsController extends Controller
 {
+    /**
+     * QuestionsController constructor.
+     */
+    public function __construct()
+    {
+        $this->middleware('auth',['except'=>'index','show']);
+    }
+
+
     /**
      * Display a listing of the resource.
      *
@@ -52,7 +62,7 @@ class QuestionsController extends Controller
     public function show(Question $question)
     {
         $question->increment('views');
-        return view('questions.show',compact('question'));
+        return view('questions.show', compact('question'));
     }
 
     /**
@@ -60,13 +70,14 @@ class QuestionsController extends Controller
      *
      * @param  \App\Question $question
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
     public function edit(Question $question)
     {
-        if (Gate::allows('update-question',$question)){
+        if ($this->authorize('update', $question)) {
             return view('questions.edit', compact('question'));
         }
-        abort(403,'Access Denied');
+        abort(403, 'Access Denied');
     }
 
     /**
@@ -91,7 +102,10 @@ class QuestionsController extends Controller
      */
     public function destroy(Question $question)
     {
-        $question->delete();
-        return redirect()->route('questions.index')->with('success','Your question has been deleted');
+        if ($this->authorize('delete',$question)) {
+            $question->delete();
+            return redirect()->route('questions.index')->with('success', 'Your question has been deleted');
+        }
+        abort(403);
     }
 }
