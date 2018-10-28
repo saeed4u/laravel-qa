@@ -18,9 +18,9 @@ class AnswersController extends Controller
      */
     public function store(Question $question, Request $request)
     {
-        $question->answers()->create(  $request->validate([
-            'body' => 'required'
-        ]) + ['user_id' => Auth::id()]);
+        $question->answers()->create($request->validate([
+                'body' => 'required'
+            ]) + ['user_id' => Auth::id()]);
         return redirect()->back()->with('success', 'Your answer has been saved');
     }
 
@@ -28,12 +28,15 @@ class AnswersController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
+     * @param Question $question
      * @param  \App\Answer $answer
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function edit(Answer $answer)
+    public function edit(Question $question, Answer $answer)
     {
-        //
+        $this->authorize('update', $answer);
+        return view('answers.edit', compact('answer', 'question'));
     }
 
     /**
@@ -42,10 +45,13 @@ class AnswersController extends Controller
      * @param  \Illuminate\Http\Request $request
      * @param  \App\Answer $answer
      * @return \Illuminate\Http\Response
+     * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function update(Request $request, Answer $answer)
+    public function update(Request $request, Question $question, Answer $answer)
     {
-        //
+        $this->authorize('update', $answer);
+        $answer->update($request->validate(['body' => 'required']));
+        return redirect()->route('questions.show', $question->slug)->with('success', 'Answer updated successfully');
     }
 
     /**
